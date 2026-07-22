@@ -1,0 +1,47 @@
+.market-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: .625rem; margin-top: .625rem; }
+.deck-card { min-height: 8.5rem; border: 1px solid var(--tier-color); border-radius: var(--radius-sm); background: linear-gradient(145deg, #17232d, #0f171f); color: var(--tier-color); cursor: pointer; }
+.deck-card:disabled { cursor: default; opacity: .65; }
+.deck-card strong, .deck-card span { display: block; }
+.deck-card strong { font-family: Georgia, serif; font-size: 1.5rem; }
+.deck-card span { margin-top: .375rem; color: var(--text-muted); font-size: .6875rem; }
+.market-cards { display: grid; grid-template-columns: repeat(4, minmax(7.25rem, 1fr)); gap: .5rem; }
+
+.development-card {
+  position: relative;
+  min-height: 8.5rem;
+  padding: .625rem;
+  border: 1px solid var(--tier-color);
+  border-top-width: .25rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tier-color) 12%, var(--surface-raised)), var(--surface));
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+.development-card:disabled { cursor: default; }
+.development-card.is-actionable:hover:not(:disabled) { transform: translateY(-.125rem); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .25); }
+.development-card.is-unaffordable { opacity: .48; }
+.card-head { display: flex; align-items: start; justify-content: space-between; min-height: 2rem; }
+.card-points { color: var(--gold-bright); font-family: Georgia, serif; font-size: 1.25rem; font-weight: 800; }
+.card-bonus { display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 1px solid var(--gem-color); border-radius: 50%; background: var(--gem-bg); }
+.card-cost { display: grid; gap: .1875rem; margin-top: .5rem; }
+.cost-chip { display: flex; align-items: center; justify-content: space-between; padding: .125rem .375rem; border-left: .1875rem solid var(--gem-color); background: rgb(0 0 0 / .18); font-size: .75rem; }
+.cost-chip.is-covered { text-decoration: line-through; opacity: .45; }
+
+.tier-1 { --tier-color: #a77d63; }
+.tier-2 { --tier-color: #91a4ad; }
+.tier-3 { --tier-color: #d3a84f; }
+.gem-white { --gem-color: #e6e7df; --gem-bg: #4c5151; }
+.gem-blue { --gem-color: #68a8d8; --gem-bg: #18344c; }
+.gem-green { --gem-color: #6eb18a; --gem-bg: #173b2d; }
+.gem-red { --gem-color: #d47770; --gem-bg: #4a2223; }
+.gem-black { --gem-color: #989da2; --gem-bg: #24272a; }
+.gem-gold { --gem-color: #e4be63; --gem-bg: #4b3b18; }
+
+.noble-card { min-width: 8.5rem; padding: .625rem .75rem; border: 1px solid #8c765d; border-top: .1875rem solid var(--gold); border-radius: var(--radius-sm); background: #252731; }
+.noble-card strong { display: block; color: var(--gold-bright); font-family: Georgia, serif; }
+.noble-cost { display: flex; gap: .25rem; margin-top: .375rem; flex-wrap: wrap; }
+.noble-cost span { padding: .125rem .25rem; border-bottom: .125rem solid var(--gem-color); font-size: .75rem; }
+
+.reserved-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .375rem; }
+.reserved-cards .development-card { min-height: 7.5rem; }

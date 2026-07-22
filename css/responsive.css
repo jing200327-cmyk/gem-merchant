@@ -1,0 +1,36 @@
+@import url("./ai.css");
+
+@media (max-width: 68rem) {
+  .game-grid { grid-template-columns: 1fr; }
+  .player-column { grid-template-columns: 1fr 1fr; }
+  .player-panel { grid-row: span 2; }
+}
+
+@media (max-width: 50rem) {
+  .topbar { align-items: flex-start; }
+  .topbar-actions { max-width: 22rem; }
+  .market-cards { grid-template-columns: repeat(2, minmax(7rem, 1fr)); }
+  .opponents { grid-template-columns: 1fr; }
+  .player-column { grid-template-columns: 1fr; }
+  .player-panel { grid-row: auto; }
+}
+
+@media (max-width: 35rem) {
+  .game-shell { padding: .5rem; }
+  .topbar { display: block; padding: .75rem .5rem; }
+  .topbar-actions { margin-top: .75rem; justify-content: flex-start; }
+  .topbar-actions .button { min-height: 2.25rem; padding: .5rem .625rem; font-size: .75rem; }
+  .version-badge { width: 100%; }
+  .board-section, .player-panel, .action-panel, .log-panel { padding: .75rem; }
+  .section-heading > p { display: none; }
+  .market-row { grid-template-columns: 3.5rem minmax(0, 1fr); }
+  .deck-card { min-height: 7rem; }
+  .development-card { min-height: 7rem; }
+  .action-buttons { grid-template-columns: 1fr; }
+  .token { flex-basis: 4.5rem; min-width: 4.5rem; }
+  .noble-choices, .return-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}

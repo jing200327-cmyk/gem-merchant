@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+    <defs>
+<filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+  <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.18"/>
+</filter>
+<filter id="shine" x="-20%" y="-20%" width="140%" height="140%">
+  <feGaussianBlur stdDeviation="1.2"/>
+</filter>
+<linearGradient id="goldFrame" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%" stop-color="#fff6be"/>
+  <stop offset="18%" stop-color="#f3cd54"/>
+  <stop offset="52%" stop-color="#d89405"/>
+  <stop offset="82%" stop-color="#f5d566"/>
+  <stop offset="100%" stop-color="#a96900"/>
+</linearGradient>
+<linearGradient id="goldInner" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%" stop-color="#fffad4"/>
+  <stop offset="100%" stop-color="#d79a12"/>
+</linearGradient>
+
+    <radialGradient id="emeraldCore" cx="48%" cy="35%" r="85%">
+      <stop offset="0%" stop-color="#47f590"/>
+      <stop offset="55%" stop-color="#00ac4f"/>
+      <stop offset="100%" stop-color="#005d2a"/>
+    </radialGradient>
+    </defs>
+    
+    <g filter="url(#softShadow)">
+      <polygon points="110,60 402,60 452,110 452,402 402,452 110,452 60,402 60,110" fill="#15c765" stroke="#0b6f36" stroke-width="7"/>
+      <polygon points="130,85 382,85 427,130 427,382 382,427 130,427 85,382 85,130" fill="url(#emeraldCore)" stroke="#0b6b35" stroke-width="5"/>
+      <polygon points="165,120 347,120 392,165 392,347 347,392 165,392 120,347 120,165" fill="#0a8c42" opacity="0.5"/>
+      <polygon points="130,85 382,85 347,120 165,120" fill="#9effc7" opacity="0.85"/>
+      <polygon points="85,130 130,85 165,120 120,165" fill="#c5ffda" opacity="0.72"/>
+      <polygon points="427,130 382,85 347,120 392,165" fill="#0f793d" opacity="0.9"/>
+      <polygon points="85,382 130,427 165,392 120,347" fill="#9af2ba" opacity="0.7"/>
+      <polygon points="427,382 382,427 347,392 392,347" fill="#0b7a3c" opacity="0.85"/>
+      <path d="M138 116 L196 92" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.7" filter="url(#shine)"/>
+    </g>
+    
+    </svg>

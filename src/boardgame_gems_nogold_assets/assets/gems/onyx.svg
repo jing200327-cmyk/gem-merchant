@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+    <defs>
+<filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+  <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.18"/>
+</filter>
+<filter id="shine" x="-20%" y="-20%" width="140%" height="140%">
+  <feGaussianBlur stdDeviation="1.2"/>
+</filter>
+<linearGradient id="goldFrame" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%" stop-color="#fff6be"/>
+  <stop offset="18%" stop-color="#f3cd54"/>
+  <stop offset="52%" stop-color="#d89405"/>
+  <stop offset="82%" stop-color="#f5d566"/>
+  <stop offset="100%" stop-color="#a96900"/>
+</linearGradient>
+<linearGradient id="goldInner" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%" stop-color="#fffad4"/>
+  <stop offset="100%" stop-color="#d79a12"/>
+</linearGradient>
+
+    <radialGradient id="onyxCore" cx="42%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#6a625d"/>
+      <stop offset="25%" stop-color="#2d2825"/>
+      <stop offset="70%" stop-color="#0d0b0a"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    </defs>
+    
+    <g filter="url(#softShadow)">
+      <polygon points="150,45 362,45 422,105 422,407 362,467 150,467 90,407 90,105" fill="#1f1b19" stroke="#4a4039" stroke-width="7"/>
+      <polygon points="170,70 342,70 392,120 392,392 342,442 170,442 120,392 120,120" fill="url(#onyxCore)" stroke="#2a231f" stroke-width="5"/>
+      <polygon points="205,110 307,110 352,155 352,357 307,402 205,402 160,357 160,155" fill="#050505" opacity="0.8"/>
+      <polygon points="170,70 342,70 307,110 205,110" fill="#9b928c" opacity="0.52"/>
+      <polygon points="120,120 170,70 205,110 160,155" fill="#c1bbb5" opacity="0.35"/>
+      <polygon points="392,120 342,70 307,110 352,155" fill="#38312c" opacity="0.65"/>
+      <polygon points="120,392 170,442 205,402 160,357" fill="#6d645f" opacity="0.28"/>
+      <polygon points="392,392 342,442 307,402 352,357" fill="#2d2622" opacity="0.55"/>
+      <path d="M138 113 L184 77" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.68" filter="url(#shine)"/>
+    </g>
+    
+    </svg>

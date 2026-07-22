@@ -1,0 +1,24 @@
+.player-config-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(6rem, .8fr) minmax(7rem, 1fr);
+  gap: .5rem;
+  padding: .75rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.player-config-row label { display: grid; gap: .25rem; }
+.player-config-row label span { color: var(--text-muted); font-size: .6875rem; font-weight: 800; }
+.player-config-row input, .player-config-row select {
+  width: 100%; min-height: 2.5rem; padding: .5rem; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm); background: var(--bg);
+}
+.player-config-row.is-ai { border-left: .1875rem solid var(--gold); padding-left: .5rem; }
+.player-config-row select:disabled { opacity: .45; }
+.controller-badge { color: var(--gold); font-family: Inter, ui-sans-serif, sans-serif; font-size: .625rem; font-weight: 800; letter-spacing: .04em; }
+.ai-thinking { color: var(--gold-bright); }
+
+@media (max-width: 35rem) {
+  .player-config-row { grid-template-columns: 1fr 1fr; }
+  .player-config-row label:first-child { grid-column: 1 / -1; }
+}

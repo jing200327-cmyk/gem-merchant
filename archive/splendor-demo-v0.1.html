@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>璀璨宝石 Splendor</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e; color: #e0e0e0;
+  min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+  padding: 10px;
+  user-select: none;
+}
+#app { width: 100%; max-width: 1300px; }
+
+/* ===== Setup Screen ===== */
+#setup {
+  position: fixed; inset: 0; background: #1a1a2e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 100;
+}
+#setup h1 { font-size: 3em; margin-bottom: 10px; background: linear-gradient(135deg, #ffd54f, #ffb300, #ffd54f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#setup .subtitle { color: #888; margin-bottom: 40px; font-size: 1.1em; }
+#setup .form-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+#setup label { font-size: 1.1em; color: #bbb; min-width: 100px; text-align: right; }
+#setup select, #setup input {
+  padding: 10px 16px; font-size: 1em; border-radius: 8px; border: 2px solid #444;
+  background: #2a2a3e; color: #fff; outline: none;
+}
+#setup select:focus, #setup input:focus { border-color: #ffb300; }
+#setup input { width: 200px; }
+.player-names { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.player-names .pn-row { display: flex; align-items: center; gap: 10px; }
+.player-names .pn-label { width: 60px; color: #bbb; }
+#btn-start {
+  margin-top: 30px; padding: 14px 60px; font-size: 1.3em;
+  border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
+  color: #1a1a2e; font-weight: bold; letter-spacing: 2px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#btn-start:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(255,179,0,0.4); }
+
+/* ===== Turn Transition Overlay ===== */
+#turn-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 90;
+}
+#turn-overlay.show { display: flex; }
+#turn-overlay h2 { font-size: 2.5em; margin-bottom: 20px; }
+#turn-overlay .btn-continue {
+  padding: 16px 50px; font-size: 1.3em; border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: #fff; font-weight: bold; transition: transform 0.15s;
+}
+#turn-overlay .btn-continue:hover { transform: scale(1.05); }
+
+/* ===== Game End Overlay ===== */
+#end-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 95;
+}
+#end-overlay.show { display: flex; }
+#end-overlay h2 { font-size: 2.5em; color: #ffd54f; margin-bottom: 30px; }
+#end-overlay .rank-list { list-style: none; font-size: 1.3em; }
+#end-overlay .rank-list li { padding: 12px 30px; margin: 5px 0; background: #2a2a3e; border-radius: 8px; }
+#end-overlay .rank-list .rank-1 { background: linear-gradient(135deg, #4a3800, #7a5800); border: 2px solid #ffb300; }
+#end-overlay .btn-restart {
+  margin-top: 30px; padding: 14px 50px; font-size: 1.2em;
+  border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
+  color: #1a1a2e; font-weight: bold; transition: transform 0.15s;
+}
+#end-overlay .btn-restart:hover { transform: scale(1.05); }
+
+/* ===== Main Game Layout ===== */
+#game { display: none; }
+#game.active { display: block; }
+
+/* Opponents Row */
+#opponents { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.opponent-card {
+  flex: 1; min-width: 180px; background: #232340; border-radius: 10px;
+  padding: 10px 14px; border: 2px solid #333;
+}
+.opponent-card .op-name { font-weight: bold; font-size: 1.1em; margin-bottom: 6px; }
+.opponent-card .op-info { display: flex; gap: 15px; font-size: 0.9em; color: #aaa; flex-wrap: wrap; }
+.opponent-card .op-stat { display: flex; align-items: center; gap: 4px; }
+.opponent-card .op-stat .val { color: #ffb300; font-weight: bold; }
+
+/* Current player indicator row */
+#player-indicator {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  padding: 8px 14px; background: #2a2a3e; border-radius: 8px;
+}
+#player-indicator .pi-dot { width: 12px; height: 12px; border-radius: 50%; }
+#player-indicator .pi-name { font-weight: bold; font-size: 1.1em; }
+#player-indicator .pi-score { margin-left: auto; color: #ffb300; font-weight: bold; }
+
+/* Nobles */
+#nobles-area { margin-bottom: 10px; }
+#nobles-area h3 { font-size: 0.9em; color: #888; margin-bottom: 4px; }
+#nobles-row { display: flex; gap: 10px; }
+.noble-card {
+  background: #2a2a40; border-radius: 10px; padding: 10px 14px;
+  border: 2px solid #6a4c93; min-width: 130px; text-align: center;
+}
+.noble-card .noble-cost { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; }
+.noble-card .noble-cost .nc-gem { font-size: 1.1em; }
+.noble-card .noble-pts { color: #ffd54f; font-weight: bold; font-size: 1.2em; }
+
+/* Card Market */
+#market { margin-bottom: 10px; }
+.market-row { display: flex; gap: 10px; margin-bottom: 6px; align-items: flex-start; }
+.market-row .row-label {
+  writing-mode: vertical-lr; text-orientation: upright;
+  font-size: 0.8em; color: #888; letter-spacing: 2px; padding: 5px 0;
+}
+.market-row .row-label.lv3 { color: #ffb300; }
+.market-row .row-label.lv2 { color: #b0bec5; }
+.market-row .row-label.lv1 { color: #8d6e63; }
+.market-row .row-cards { display: flex; gap: 8px; flex: 1; }
+.market-row .deck-placeholder {
+  width: 70px; height: 100px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75em; color: #666; cursor: pointer;
+  border: 2px dashed #444; transition: border-color 0.2s;
+}
+.market-row .deck-placeholder:hover { border-color: #ffb300; }
+
+/* Card Component */
+.game-card {
+  width: 110px; min-height: 150px; border-radius: 10px;
+  padding: 8px 10px; display: flex; flex-direction: column;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  position: relative; background: #1e1e38;
+  border: 3px solid #555;
+}
+.game-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+.game-card.selected { border-color: #ffb300 !important; box-shadow: 0 0 15px rgba(255,179,0,0.5); }
+.game-card.unaffordable { opacity: 0.5; }
+.game-card .card-pts {
+  position: absolute; top: 6px; left: 10px;
+  font-weight: bold; font-size: 1.3em;
+}
+.game-card .card-pts.pts-0 { color: #666; }
+.game-card .card-pts.pts-1 { color: #b0bec5; }
+.game-card .card-pts.pts-2 { color: #ffb300; }
+.game-card .card-pts.pts-3 { color: #4caf50; }
+.game-card .card-pts.pts-4 { color: #42a5f5; }
+.game-card .card-pts.pts-5 { color: #ef5350; }
+.game-card .card-bonus {
+  position: absolute; top: 6px; right: 8px;
+  font-size: 1.5em;
+}
+.game-card .card-cost { margin-top: 28px; display: flex; flex-direction: column; gap: 2px; }
+.game-card .card-cost .cost-row {
+  display: flex; align-items: center; gap: 4px; font-size: 0.85em;
+}
+.game-card .card-cost .cost-row.covered { text-decoration: line-through; opacity: 0.4; }
+.game-card.lv3 { border-color: #ff8f00; background: linear-gradient(180deg, #2a2000 0%, #1e1e38 40%); }
+.game-card.lv2 { border-color: #78909c; background: linear-gradient(180deg, #1a2a30 0%, #1e1e38 40%); }
+.game-card.lv1 { border-color: #6d4c41; background: linear-gradient(180deg, #1a2018 0%, #1e1e38 40%); }
+
+/* Reserved Card */
+.game-card.reserved { border-style: dashed; border-color: #ffd54f; }
+
+/* Gem Pool */
+#gem-pool { margin-bottom: 12px; }
+#gem-pool h3 { font-size: 0.9em; color: #888; margin-bottom: 6px; }
+#gems-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.gem-pile {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 18px; border-radius: 12px; cursor: pointer;
+  background: #232340; border: 2px solid #333;
+  transition: transform 0.15s, border-color 0.15s; min-width: 70px;
+}
+.gem-pile:hover { transform: translateY(-3px); }
+.gem-pile.selected { border-color: #ffb300; background: #3a3020; }
+.gem-pile.disabled { opacity: 0.4; cursor: not-allowed; }
+.gem-pile .gp-emoji { font-size: 2em; }
+.gem-pile .gp-count { font-weight: bold; font-size: 1.2em; }
+.gem-pile .gp-name { font-size: 0.7em; color: #888; }
+.gem-pile.gold-pile { border-color: #5a4a00; background: #2a2010; }
+
+/* ===== Current Player Area ===== */
+#player-area {
+  background: #232340; border-radius: 12px; padding: 14px;
+  border: 2px solid #444;
+}
+#player-area h3 { font-size: 0.9em; color: #888; margin-bottom: 8px; }
+
+/* Player gems */
+#player-gems { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.player-gem {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; background: #1a1a30; border-radius: 8px;
+  font-size: 1.1em;
+}
+.player-gem .pg-count { font-weight: bold; min-width: 20px; text-align: center; }
+
+/* Player cards (purchased, showing bonuses) */
+#player-cards-area { margin-bottom: 8px; }
+#player-cards-area h4 { font-size: 0.8em; color: #666; margin-bottom: 4px; }
+#player-cards-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.player-bonus-card {
+  padding: 4px 10px; background: #1a1a30; border-radius: 6px;
+  display: flex; align-items: center; gap: 4px; font-size: 0.85em;
+  border: 1px solid #333;
+}
+.player-bonus-card .pbc-count { font-weight: bold; color: #ffb300; }
+
+/* Player reserved cards */
+#player-reserved { margin-bottom: 10px; }
+#player-reserved h4 { font-size: 0.8em; color: #666; margin-bottom: 4px; }
+#player-reserved-row { display: flex; gap: 8px; }
+
+/* Action Buttons */
+#actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+#actions button {
+  padding: 10px 20px; font-size: 1em; border: 2px solid #555; border-radius: 10px;
+  cursor: pointer; background: #2a2a40; color: #e0e0e0;
+  transition: transform 0.1s, border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+#actions button:hover:not(:disabled) { transform: translateY(-2px); border-color: #ffb300; }
+#actions button:disabled { opacity: 0.3; cursor: not-allowed; }
+#actions button.action-active { background: #ff8f00; border-color: #ffb300; color: #1a1a2e; font-weight: bold; }
+#actions button.btn-cancel { border-color: #e53935; color: #ef5350; }
+#actions button.btn-confirm { border-color: #4caf50; color: #66bb6a; }
+
+/* Status bar */
+#status { margin-top: 10px; padding: 8px 14px; background: #1a1a30; border-radius: 8px; font-size: 0.85em; color: #888; text-align: center; }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .game-card { width: 90px; min-height: 130px; }
+  .game-card .card-cost .cost-row { font-size: 0.7em; }
+  .game-card .card-pts { font-size: 1.1em; }
+  .game-card .card-bonus { font-size: 1.2em; }
+  .market-row .deck-placeholder { width: 50px; height: 80px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ===== Setup Screen ===== -->
+  <div id="setup">
+    <h1>💎 璀璨宝石</h1>
+    <p class="subtitle">Splendor · 热座多人桌游</p>
+    <div class="form-row">
+      <label for="sel-count">玩家人数</label>
+      <select id="sel-count">
+        <option value="2">2 人</option>
+        <option value="3" selected>3 人</option>
+        <option value="4">4 人</option>
+      </select>
+    </div>
+    <div class="player-names" id="name-inputs">
+      <div class="pn-row"><span class="pn-label">玩家 1</span><input type="text" class="pname" value="玩家1" maxlength="8"></div>
+      <div class="pn-row"><span class="pn-label">玩家 2</span><input type="text" class="pname" value="玩家2" maxlength="8"></div>
+      <div class="pn-row"><span class="pn-label">玩家 3</span><input type="text" class="pname" value="玩家3" maxlength="8"></div>
+      <div class="pn-row" id="pn-4" style="display:none"><span class="pn-label">玩家 4</span><input type="text" class="pname" value="玩家4" maxlength="8"></div>
+    </div>
+    <button id="btn-start">开始游戏</button>
+  </div>
+
+  <!-- ===== Turn Transition Overlay ===== -->
+  <div id="turn-overlay">
+    <h2 id="turn-msg">请将设备传递给 玩家2</h2>
+    <button class="btn-continue" id="btn-continue">👀 开始我的回合</button>
+  </div>
+
+  <!-- ===== Game End Overlay ===== -->
+  <div id="end-overlay">
+    <h2>🏆 游戏结束</h2>
+    <ol class="rank-list" id="rank-list"></ol>
+    <button class="btn-restart" id="btn-restart">🔄 再来一局</button>
+  </div>
+
+  <!-- ===== Main Game ===== -->
+  <div id="game">
+    <!-- Opponents -->
+    <div id="opponents"></div>
+
+    <!-- Current Player Indicator -->
+    <div id="player-indicator">
+      <div class="pi-dot" id="pi-dot"></div>
+      <span class="pi-name" id="pi-name"></span>
+      <span class="pi-score" id="pi-score">🏆 0</span>
+    </div>
+
+    <!-- Nobles -->
+    <div id="nobles-area">
+      <h3>👑 贵族</h3>
+      <div id="nobles-row"></div>
+    </div>
+
+    <!-- Card Market -->
+    <div id="market">
+      <div class="market-row" id="row-lv3">
+        <span class="row-label lv3">三级</span>
+        <div class="row-cards" id="cards-lv3"></div>
+        <div class="deck-placeholder" id="deck-lv3" title="盲抽三级卡">🂠<br>剩0</div>
+      </div>
+      <div class="market-row" id="row-lv2">
+        <span class="row-label lv2">二级</span>
+        <div class="row-cards" id="cards-lv2"></div>
+        <div class="deck-placeholder" id="deck-lv2" title="盲抽二级卡">🂠<br>剩0</div>
+      </div>
+      <div class="market-row" id="row-lv1">
+        <span class="row-label lv1">一级</span>
+        <div class="row-cards" id="cards-lv1"></div>
+        <div class="deck-placeholder" id="deck-lv1" title="盲抽一级卡">🂠<br>剩0</div>
+      </div>
+    </div>
+
+    <!-- Gem Pool -->
+    <div id="gem-pool">
+      <h3>💠 宝石堆</h3>
+      <div id="gems-row"></div>
+    </div>
+
+    <!-- Current Player Area -->
+    <div id="player-area">
+      <h3 id="pa-title">🎒 我的资产</h3>
+      <div id="player-gems"></div>
+      <div id="player-cards-area">
+        <h4>📦 已购卡牌 (折扣)</h4>
+        <div id="player-cards-row"></div>
+      </div>
+      <div id="player-reserved">
+        <h4>📋 预留卡牌 (<span id="reserved-count">0</span>/3)</h4>
+        <div id="player-reserved-row"></div>
+      </div>
+      <div id="actions">
+        <button id="btn-take3">🎨 拿3个不同宝石</button>
+        <button id="btn-take2">🎨 拿2个相同宝石</button>
+        <button id="btn-buy">💰 购买卡牌</button>
+        <button id="btn-reserve">📋 预留卡牌</button>
+        <button id="btn-cancel" class="btn-cancel" style="display:none">✖ 取消</button>
+        <button id="btn-confirm" class="btn-confirm" style="display:none">✔ 确认</button>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="status">等待开始...</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const GEM_TYPES = ['white','blue','green','red','black'];
+const ALL_GEM_TYPES = [...GEM_TYPES, 'gold'];
+
+const GEM_INFO = {
+  white:  { emoji:'💎', name:'钻石',   cssColor:'#e0e0e0', bg:'#3a3a4a' },
+  blue:   { emoji:'🔷', name:'蓝宝石', cssColor:'#42a5f5', bg:'#1a3050' },
+  green:  { emoji:'🟢', name:'祖母绿', cssColor:'#66bb6a', bg:'#1a3a2a' },
+  red:    { emoji:'🔴', name:'红宝石', cssColor:'#ef5350', bg:'#3a1a1a' },
+  black:  { emoji:'⚫', name:'缟玛瑙', cssColor:'#9e9e9e', bg:'#2a2a2a' },
+  gold:   { emoji:'🟡', name:'黄金',   cssColor:'#ffd54f', bg:'#3a3010' },
+};
+
+const GEM_POOL_BASE = { 2:4, 3:5, 4:7 };
+const GOLD_POOL = 5;
+const MAX_HELD_GEMS = 10;
+const MAX_RESERVED = 3;
+const WIN_SCORE = 15;
+
+const NOBLE_PRESETS = [
+  { cost:{white:4, blue:4, green:0, red:0, black:0} },
+  { cost:{white:0, blue:4, green:4, red:0, black:0} },
+  { cost:{white:0, blue:0, green:4, red:4, black:0} },
+  { cost:{white:0, blue:0, green:0, red:4, black:4} },
+  { cost:{white:4, blue:0, green:0, red:0, black:4} },
+  { cost:{white:3, blue:3, green:3, red:0, black:0} },
+  { cost:{white:0, blue:3, green:3, red:3, black:0} },
+  { cost:{white:0, blue:0, green:3, red:3, black:3} },
+  { cost:{white:3, blue:0, green:0, red:3, black:3} },
+  { cost:{white:3, blue:3, green:0, red:0, black:3} },
+];
+
+// ============================================================
+// CARD GENERATOR
+// ============================================================
+function generateCards() {
+  const cards = { 1:[], 2:[], 3:[] };
+
+  // Level 1: 40 cards, cost 1-4, mostly 0 prestige, some 1
+  const lv1Specs = [
+    { costTotal:1, count:6, prestige:0 },
+    { costTotal:2, count:8, prestige:0 },
+    { costTotal:2, count:3, prestige:1 },
+    { costTotal:3, count:10, prestige:0 },
+    { costTotal:3, count:4, prestige:1 },
+    { costTotal:4, count:5, prestige:0 },
+    { costTotal:4, count:4, prestige:1 },
+  ];
+  for (const spec of lv1Specs) {
+    for (let i = 0; i < spec.count; i++) {
+      cards[1].push(generateCard(1, spec.costTotal, spec.prestige));
+    }
+  }
+
+  // Level 2: 30 cards, cost 5-7, 1-2 prestige
+  const lv2Specs = [
+    { costTotal:5, count:8, prestige:1 },
+    { costTotal:5, count:3, prestige:2 },
+    { costTotal:6, count:8, prestige:1 },
+    { costTotal:6, count:4, prestige:2 },
+    { costTotal:7, count:5, prestige:2 },
+    { costTotal:7, count:2, prestige:3 },
+  ];
+  for (const spec of lv2Specs) {
+    for (let i = 0; i < spec.count; i++) {
+      cards[2].push(generateCard(2, spec.costTotal, spec.prestige));
+    }
+  }
+
+  // Level 3: 20 cards, cost 7-12, 3-5 prestige
+  const lv3Specs = [
+    { costTotal:7, count:4, prestige:3 },
+    { costTotal:8, count:4, prestige:3 },
+    { costTotal:9, count:4, prestige:4 },
+    { costTotal:10, count:4, prestige:4 },
+    { costTotal:11, count:2, prestige:5 },
+    { costTotal:12, count:2, prestige:5 },
+  ];
+  for (const spec of lv3Specs) {
+    for (let i = 0; i < spec.count; i++) {
+      cards[3].push(generateCard(3, spec.costTotal, spec.prestige));
+    }
+  }
+
+  // Shuffle all decks
+  for (const lv of [1,2,3]) {
+    shuffle(cards[lv]);
+  }
+
+  return cards;
+}
+
+function generateCard(level, costTotal, prestige) {
+  // Distribute cost across 1-3 gem colors
+  const cost = { white:0, blue:0, green:0, red:0, black:0 };
+  const colors = shuffled([...GEM_TYPES]);
+  const numColors = costTotal <= 3 ? (1 + Math.floor(Math.random() * 2)) : (2 + Math.floor(Math.random() * 3));
+  const usedColors = colors.slice(0, Math.min(numColors, 5));
+  // Give each used color at least 1
+  let remaining = costTotal;
+  for (const g of usedColors) {
+    cost[g] = 1;
+    remaining--;
+  }
+  // Distribute remaining randomly
+  while (remaining > 0) {
+    const g = usedColors[Math.floor(Math.random() * usedColors.length)];
+    cost[g]++;
+    remaining--;
+  }
+  // Bonus gem: any of the 5 colors
+  const bonus = GEM_TYPES[Math.floor(Math.random() * 5)];
+  return { level, cost, bonusGem: bonus, prestige };
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function shuffled(arr) {
+  const a = [...arr];
+  shuffle(a);
+  return a;
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+class GameState {
+  constructor(playerNames) {
+    const n = playerNames.length;
+    this.playerCount = n;
+
+    // Players
+    this.players = playerNames.map((name, i) => ({
+      name,
+      gems: { white:0, blue:0, green:0, red:0, black:0, gold:0 },
+      cards: [],       // purchased cards
+      reserved: [],    // reserved cards
+      nobles: [],      // visited nobles
+      get prestige() { return this.cards.reduce((s,c)=>s+c.prestige,0) + this.nobles.length * 3; },
+    }));
+
+    // Player prestige is computed, not stored directly
+
+    // Gem pool
+    const base = GEM_POOL_BASE[n];
+    this.gemPool = { white:base, blue:base, green:base, red:base, black:base, gold:GOLD_POOL };
+
+    // Card decks + market
+    const allCards = generateCards();
+    this.decks = { 1: allCards[1], 2: allCards[2], 3: allCards[3] };
+    this.market = { 1:[], 2:[], 3:[] };
+    for (const lv of [1,2,3]) {
+      for (let i = 0; i < 4; i++) {
+        if (this.decks[lv].length > 0) {
+          this.market[lv].push(this.decks[lv].pop());
+        }
+      }
+    }
+
+    // Nobles
+    const noblePool = shuffled(NOBLE_PRESETS);
+    this.nobles = noblePool.slice(0, n + 1);
+
+    // Turn tracking
+    this.currentPlayerIdx = 0;
+    this.turnPhase = 'idle'; // idle | take_gems | buy_card | reserve_card
+    this.selectedGemTypes = [];  // for take_gems phase
+    this.selectedCardKey = null; // for buy_card / reserve_card phase
+    this.gameOver = false;
+    this.finalRoundTriggered = false;
+    this.finalRoundPlayer = -1; // the player who triggered final round
+    this.turnHistory = [];
+  }
+
+  currentPlayer() { return this.players[this.currentPlayerIdx]; }
+
+  playerPrestige(p) {
+    return p.cards.reduce((s,c) => s + c.prestige, 0) + p.nobles.length * 3;
+  }
+
+  playerGemCount(p) {
+    return Object.values(p.gems).reduce((a,b) => a + b, 0);
+  }
+
+  playerBonusGems(p) {
+    const bonus = { white:0, blue:0, green:0, red:0, black:0 };
+    for (const card of p.cards) {
+      bonus[card.bonusGem]++;
+    }
+    return bonus;
+  }
+
+  // Calculate what a card actually costs for a given player
+  effectiveCost(player, card) {
+    const bonus = this.playerBonusGems(player);
+    const cost = {};
+    for (const g of GEM_TYPES) {
+      cost[g] = Math.max(0, card.cost[g] - bonus[g]);
+    }
+    return cost;
+  }
+
+  // Can player afford card?
+  canAfford(player, card) {
+    const effCost = this.effectiveCost(player, card);
+    let shortfall = 0;
+    for (const g of GEM_TYPES) {
+      if (effCost[g] > player.gems[g]) {
+        shortfall += effCost[g] - player.gems[g];
+      }
+    }
+    return shortfall <= player.gems.gold;
+  }
+
+  // Pay for a card: deduct from player gems, return to pool
+  executePayment(player, card) {
+    const effCost = this.effectiveCost(player, card);
+    // First pass: pay with matching gems
+    for (const g of GEM_TYPES) {
+      const toPay = Math.min(effCost[g], player.gems[g]);
+      if (toPay > 0) {
+        player.gems[g] -= toPay;
+        this.gemPool[g] += toPay;
+        effCost[g] -= toPay;
+      }
+    }
+    // Second pass: cover remaining with gold
+    for (const g of GEM_TYPES) {
+      if (effCost[g] > 0) {
+        player.gems.gold -= effCost[g];
+        this.gemPool.gold += effCost[g];
+      }
+    }
+  }
+
+  // Check if a noble visits the player
+  checkNobles(player) {
+    const bonus = this.playerBonusGems(player);
+    const visitedNobles = [];
+    for (let i = this.nobles.length - 1; i >= 0; i--) {
+      const noble = this.nobles[i];
+      let meets = true;
+      for (const g of GEM_TYPES) {
+        if (bonus[g] < (noble.cost[g] || 0)) {
+          meets = false;
+          break;
+        }
+      }
+      if (meets) {
+        visitedNobles.push(this.nobles[i]);
+        this.nobles.splice(i, 1);
+      }
+    }
+    return visitedNobles;
+  }
+
+  // Advance to next player
+  nextPlayer() {
+    this.currentPlayerIdx = (this.currentPlayerIdx + 1) % this.playerCount;
+    this.turnPhase = 'idle';
+    this.selectedGemTypes = [];
+    this.selectedCardKey = null;
+  }
+
+  // Check if we've gone all the way around after final round trigger
+  isFinalRoundComplete() {
+    if (!this.finalRoundTriggered) return false;
+    return this.currentPlayerIdx === this.finalRoundPlayer;
+  }
+}
+
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+let game = null;
+let actionMode = null; // null | 'take3' | 'take2' | 'buy' | 'reserve'
+let selectedGems = {}; // { white: 1, blue: 1, green: 1 } for take3 or { white: 2 } for take2
+let selectedCardIdx = null; // { level: 1|2|3, index: number } or { reserved: true, index: number }
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderAll() {
+  if (!game) return;
+  renderOpponents();
+  renderPlayerIndicator();
+  renderNobles();
+  renderMarket();
+  renderGemPool();
+  renderPlayerArea();
+  renderStatus();
+  updateActionButtons();
+}
+
+function renderOpponents() {
+  const container = document.getElementById('opponents');
+  const others = game.players.filter((_, i) => i !== game.currentPlayerIdx);
+  container.innerHTML = others.map((p, idx) => {
+    const actualIdx = game.players.indexOf(p);
+    const prestige = game.playerPrestige(p);
+    const gemCount = game.playerGemCount(p);
+    const bonus = game.playerBonusGems(p);
+    const bonusStr = GEM_TYPES.filter(g => bonus[g] > 0).map(g => `${GEM_INFO[g].emoji}${bonus[g]}`).join(' ');
+    return `
+      <div class="opponent-card">
+        <div class="op-name">👤 ${escHtml(p.name)}</div>
+        <div class="op-info">
+          <span class="op-stat">🏆 <span class="val">${prestige}</span></span>
+          <span class="op-stat">💠 <span class="val">${gemCount}</span></span>
+          <span class="op-stat">📦 <span class="val">${p.cards.length}</span></span>
+          <span class="op-stat">📋 <span class="val">${p.reserved.length}</span></span>
+        </div>
+        ${bonusStr ? `<div style="font-size:0.8em;margin-top:4px;color:#aaa;">折扣: ${bonusStr}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPlayerIndicator() {
+  const p = game.currentPlayer();
+  document.getElementById('pi-name').textContent = p.name;
+  document.getElementById('pi-score').textContent = `🏆 ${game.playerPrestige(p)}`;
+  const colors = ['#e53935','#42a5f5','#66bb6a','#ffb300'];
+  document.getElementById('pi-dot').style.background = colors[game.currentPlayerIdx % 4];
+}
+
+function renderNobles() {
+  const row = document.getElementById('nobles-row');
+  if (game.nobles.length === 0) {
+    row.innerHTML = '<span style="color:#666;font-size:0.85em;">贵族已全部被拜访</span>';
+    return;
+  }
+  row.innerHTML = game.nobles.map(n => {
+    const costStr = GEM_TYPES.filter(g => n.cost[g] > 0).map(g =>
+      `<span class="nc-gem">${GEM_INFO[g].emoji}${n.cost[g]}</span>`
+    ).join(' ');
+    return `<div class="noble-card">
+      <div class="noble-pts">⭐3</div>
+      <div class="noble-cost">${costStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMarket() {
+  for (const lv of [1,2,3]) {
+    const container = document.getElementById(`cards-lv${lv}`);
+    container.innerHTML = game.market[lv].map((card, i) => {
+      return renderCard(card, 'market', lv, i);
+    }).join('');
+    // Deck placeholder
+    const deckEl = document.getElementById(`deck-lv${lv}`);
+    const remaining = game.decks[lv].length;
+    deckEl.innerHTML = `🂠<br>剩${remaining}`;
+    deckEl.style.cursor = (actionMode === 'reserve' && game.currentPlayer().reserved.length < MAX_RESERVED) ? 'pointer' : 'default';
+    deckEl.onclick = () => onDeckClick(lv);
+  }
+}
+
+function renderCard(card, source, lv, idx) {
+  const p = game.currentPlayer();
+  const effCost = game.effectiveCost(p, card);
+  const affordable = game.canAfford(p, card);
+  const ptsClass = `pts-${Math.min(card.prestige, 5)}`;
+
+  let selectedClass = '';
+  if (actionMode === 'buy' || actionMode === 'reserve') {
+    if (source === 'market' && selectedCardIdx && selectedCardIdx.source === 'market' && selectedCardIdx.level === lv && selectedCardIdx.index === idx) {
+      selectedClass = 'selected';
+    }
+    if (source === 'reserved' && selectedCardIdx && selectedCardIdx.source === 'reserved' && selectedCardIdx.index === idx) {
+      selectedClass = 'selected';
+    }
+  }
+
+  const costRows = GEM_TYPES.filter(g => card.cost[g] > 0).map(g => {
+    const originalCost = card.cost[g];
+    const actualCost = effCost[g];
+    const discounted = originalCost !== actualCost;
+    if (actualCost === 0) {
+      return `<div class="cost-row covered">
+        ${GEM_INFO[g].emoji} <span style="text-decoration:line-through;opacity:0.5;">${originalCost}</span> ✓
+      </div>`;
+    }
+    if (discounted) {
+      return `<div class="cost-row">
+        ${GEM_INFO[g].emoji} <span style="text-decoration:line-through;opacity:0.5;font-size:0.8em;">${originalCost}</span> ${actualCost}
+      </div>`;
+    }
+    return `<div class="cost-row">
+      ${GEM_INFO[g].emoji} ${actualCost}
+    </div>`;
+  }).join('');
+
+  const dataKey = source === 'market' ? `data-lv="${lv}" data-idx="${idx}"` : `data-reserved="${idx}"`;
+
+  return `
+    <div class="game-card lv${lv} ${selectedClass} ${!affordable && actionMode === 'buy' ? 'unaffordable' : ''}"
+         ${dataKey}
+         onclick="onCardClick('${source}', ${lv}, ${idx})">
+      <span class="card-pts ${ptsClass}">${card.prestige > 0 ? '⭐'+card.prestige : ''}</span>
+      <span class="card-bonus">${GEM_INFO[card.bonusGem].emoji}</span>
+      <div class="card-cost">${costRows}</div>
+    </div>
+  `;
+}
+
+function renderGemPool() {
+  const row = document.getElementById('gems-row');
+  row.innerHTML = ALL_GEM_TYPES.map(g => {
+    const info = GEM_INFO[g];
+    const count = game.gemPool[g];
+    const isGold = g === 'gold';
+    let selClass = '';
+    if (actionMode === 'take3' && selectedGems[g]) {
+      selClass = 'selected';
+    }
+    if (actionMode === 'take2' && selectedGems[g]) {
+      selClass = 'selected';
+    }
+    const isGoldDisabled = (actionMode === 'take3' || actionMode === 'take2') && isGold;
+    const disabled = ((actionMode === 'take3' || actionMode === 'take2') && count === 0 && !selectedGems[g]) || isGoldDisabled;
+    return `
+      <div class="gem-pile ${isGold ? 'gold-pile' : ''} ${selClass} ${disabled ? 'disabled' : ''}"
+           data-gem="${g}"
+           onclick="onGemClick('${g}')">
+        <span class="gp-emoji">${info.emoji}</span>
+        <span class="gp-count">${count}</span>
+        <span class="gp-name">${info.name}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPlayerArea() {
+  const p = game.currentPlayer();
+  document.getElementById('pa-title').textContent = `🎒 ${p.name} 的资产`;
+
+  // Gems
+  const gemsDiv = document.getElementById('player-gems');
+  gemsDiv.innerHTML = ALL_GEM_TYPES.map(g => {
+    const info = GEM_INFO[g];
+    return `<div class="player-gem" style="background:${info.bg};">
+      <span>${info.emoji}</span>
+      <span class="pg-count">${p.gems[g]}</span>
+    </div>`;
+  }).join('') + `<span style="color:#888;font-size:0.8em;align-self:center;">共 ${game.playerGemCount(p)}/${MAX_HELD_GEMS}</span>`;
+
+  // Purchased cards (bonuses)
+  const bonus = game.playerBonusGems(p);
+  const cardsRow = document.getElementById('player-cards-row');
+  const totalCards = p.cards.length;
+  const bonusHtml = GEM_TYPES.map(g => {
+    if (bonus[g] > 0) {
+      return `<div class="player-bonus-card">${GEM_INFO[g].emoji} <span class="pbc-count">×${bonus[g]}</span></div>`;
+    }
+    return '';
+  }).join('');
+  cardsRow.innerHTML = bonusHtml || '<span style="color:#555;font-size:0.8em;">暂无折扣卡</span>';
+  cardsRow.innerHTML += `<span style="color:#888;font-size:0.8em;align-self:center;margin-left:8px;">共 ${totalCards} 张</span>`;
+
+  // Reserved cards
+  document.getElementById('reserved-count').textContent = p.reserved.length;
+  const reservedRow = document.getElementById('player-reserved-row');
+  reservedRow.innerHTML = p.reserved.map((card, i) => {
+    return renderCard(card, 'reserved', card.level, i);
+  }).join('') || '<span style="color:#555;font-size:0.8em;">无预留卡牌</span>';
+}
+
+function renderStatus() {
+  const statusEl = document.getElementById('status');
+  if (game.gameOver) {
+    statusEl.textContent = '游戏结束！';
+    statusEl.style.color = '#ffb300';
+    return;
+  }
+  const p = game.currentPlayer();
+  let msg = `${p.name} 的回合`;
+  if (actionMode === 'take3') msg += ' — 选择3个不同颜色的宝石';
+  else if (actionMode === 'take2') msg += ' — 选择1堆宝石（至少4个可取2个）';
+  else if (actionMode === 'buy') msg += ' — 点击要购买的卡牌';
+  else if (actionMode === 'reserve') msg += ' — 点击要预留的卡牌（或点击牌堆盲抽）';
+  msg += ` | 回合${game.turnHistory.length + 1}`;
+  if (game.finalRoundTriggered) msg += ' | 🔔 最后一轮！';
+  statusEl.textContent = msg;
+  statusEl.style.color = game.finalRoundTriggered ? '#ffb300' : '#888';
+}
+
+// ============================================================
+// ACTION BUTTONS
+// ============================================================
+function updateActionButtons() {
+  if (game.gameOver) {
+    document.querySelectorAll('#actions button').forEach(b => b.disabled = true);
+    return;
+  }
+
+  const p = game.currentPlayer();
+  const gemCount = game.playerGemCount(p);
+  const canTake3 = gemCount <= MAX_HELD_GEMS - 3;
+  const poolHasAny = GEM_TYPES.some(g => game.gemPool[g] > 0);
+
+  // Check if any gem pile has >= 4 for take2
+  const hasGlutPile = GEM_TYPES.some(g => game.gemPool[g] >= 4);
+  const canTake2 = hasGlutPile && gemCount <= MAX_HELD_GEMS - 2;
+
+  // Can buy any visible or reserved card?
+  const canAffordAny = [...game.market[1], ...game.market[2], ...game.market[3], ...p.reserved]
+    .some(c => game.canAfford(p, c));
+
+  const canReserve = p.reserved.length < MAX_RESERVED;
+  const hasGold = game.gemPool.gold > 0;
+  const hasAnyCardsLeft = game.market[1].length + game.market[2].length + game.market[3].length +
+    game.decks[1].length + game.decks[2].length + game.decks[3].length > 0;
+
+  const isActive = actionMode !== null;
+
+  document.getElementById('btn-take3').disabled = isActive || !canTake3 || !poolHasAny;
+  document.getElementById('btn-take2').disabled = isActive || !canTake2;
+  document.getElementById('btn-buy').disabled = isActive || !canAffordAny;
+  document.getElementById('btn-reserve').disabled = isActive || !canReserve || !hasAnyCardsLeft;
+
+  document.getElementById('btn-cancel').style.display = isActive ? '' : 'none';
+  document.getElementById('btn-confirm').style.display = (actionMode === 'take3' || actionMode === 'take2') ? '' : 'none';
+
+  // Highlight active action button
+  document.getElementById('btn-take3').classList.toggle('action-active', actionMode === 'take3');
+  document.getElementById('btn-take2').classList.toggle('action-active', actionMode === 'take2');
+  document.getElementById('btn-buy').classList.toggle('action-active', actionMode === 'buy');
+  document.getElementById('btn-reserve').classList.toggle('action-active', actionMode === 'reserve');
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+function onGemClick(gemType) {
+  if (game.gameOver) return;
+
+  if (actionMode === 'take3') {
+    handleTake3GemClick(gemType);
+  } else if (actionMode === 'take2') {
+    handleTake2GemClick(gemType);
+  }
+  renderAll();
+}
+
+function handleTake3GemClick(gemType) {
+  if (gemType === 'gold') return; // can't take gold with regular take action
+
+  const poolCount = game.gemPool[gemType];
+  if (poolCount <= 0 && !selectedGems[gemType]) return;
+
+  // Toggle selection
+  if (selectedGems[gemType]) {
+    delete selectedGems[gemType];
+  } else {
+    // Check limit: max 3 different
+    const currentCount = Object.keys(selectedGems).length;
+    if (currentCount >= 3) return;
+    // Check player gem limit
+    const p = game.currentPlayer();
+    if (game.playerGemCount(p) + 1 > MAX_HELD_GEMS) return;
+    selectedGems[gemType] = 1;
+  }
+}
+
+function handleTake2GemClick(gemType) {
+  if (gemType === 'gold') return;
+
+  const poolCount = game.gemPool[gemType];
+  if (poolCount < 4) return;
+
+  // Toggle: select this color, deselect others
+  if (selectedGems[gemType]) {
+    selectedGems = {};
+  } else {
+    selectedGems = {};
+    selectedGems[gemType] = 2;
+  }
+}
+
+function onCardClick(source, lv, idx) {
+  if (game.gameOver) return;
+
+  if (actionMode === 'buy') {
+    selectedCardIdx = { source, level: lv, index: idx };
+    // Auto-execute the buy
+    executeBuyCard();
+  } else if (actionMode === 'reserve') {
+    if (source === 'market') {
+      selectedCardIdx = { source, level: lv, index: idx };
+      executeReserveCard();
+    } else if (source === 'reserved') {
+      // Can't reserve a card that's already reserved
+      return;
+    }
+  }
+  renderAll();
+}
+
+function onDeckClick(lv) {
+  if (game.gameOver) return;
+  if (actionMode !== 'reserve') return;
+
+  const p = game.currentPlayer();
+  if (p.reserved.length >= MAX_RESERVED) return;
+  if (game.decks[lv].length <= 0) return;
+
+  executeReserveFromDeck(lv);
+  renderAll();
+}
+
+function executeBuyCard() {
+  if (!selectedCardIdx) return;
+
+  const p = game.currentPlayer();
+  let card;
+
+  if (selectedCardIdx.source === 'market') {
+    const { level, index } = selectedCardIdx;
+    card = game.market[level][index];
+  } else if (selectedCardIdx.source === 'reserved') {
+    card = p.reserved[selectedCardIdx.index];
+  }
+
+  if (!card) return;
+  if (!game.canAfford(p, card)) return;
+
+  // Pay
+  game.executePayment(p, card);
+
+  // Remove card from source and add to player
+  if (selectedCardIdx.source === 'market') {
+    const { level, index } = selectedCardIdx;
+    game.market[level].splice(index, 1);
+    // Refill market
+    if (game.decks[level].length > 0) {
+      game.market[level].splice(index, 0, game.decks[level].pop());
+    }
+  } else if (selectedCardIdx.source === 'reserved') {
+    p.reserved.splice(selectedCardIdx.index, 1);
+  }
+
+  p.cards.push(card);
+
+  // Check nobles
+  const visited = game.checkNobles(p);
+  p.nobles.push(...visited);
+
+  // Check win condition
+  const prestige = game.playerPrestige(p);
+  if (prestige >= WIN_SCORE && !game.finalRoundTriggered) {
+    game.finalRoundTriggered = true;
+    game.finalRoundPlayer = game.currentPlayerIdx;
+  }
+
+  // End turn
+  endAction();
+}
+
+function executeReserveCard() {
+  if (!selectedCardIdx) return;
+  if (selectedCardIdx.source !== 'market') return;
+
+  const p = game.currentPlayer();
+  if (p.reserved.length >= MAX_RESERVED) return;
+
+  const { level, index } = selectedCardIdx;
+  const card = game.market[level][index];
+
+  // Remove from market
+  game.market[level].splice(index, 1);
+  // Refill
+  if (game.decks[level].length > 0) {
+    game.market[level].splice(index, 0, game.decks[level].pop());
+  }
+
+  // Add to reserved
+  p.reserved.push(card);
+
+  // Give gold
+  if (game.gemPool.gold > 0) {
+    p.gems.gold++;
+    game.gemPool.gold--;
+  }
+
+  endAction();
+}
+
+function executeReserveFromDeck(lv) {
+  const p = game.currentPlayer();
+  if (p.reserved.length >= MAX_RESERVED) return;
+  if (game.decks[lv].length <= 0) return;
+
+  const card = game.decks[lv].pop();
+  p.reserved.push(card);
+
+  // Give gold
+  if (game.gemPool.gold > 0) {
+    p.gems.gold++;
+    game.gemPool.gold--;
+  }
+
+  endAction();
+}
+
+function confirmTakeGems() {
+  const p = game.currentPlayer();
+
+  if (actionMode === 'take3') {
+    const types = Object.keys(selectedGems);
+    if (types.length === 0 || types.length > 3) return;
+    // All must be different
+    for (const g of types) {
+      if (game.gemPool[g] <= 0) return;
+      if (g === 'gold') return;
+    }
+    // Check total gems after taking
+    if (game.playerGemCount(p) + types.length > MAX_HELD_GEMS) return;
+
+    for (const g of types) {
+      game.gemPool[g]--;
+      p.gems[g]++;
+    }
+  } else if (actionMode === 'take2') {
+    const types = Object.keys(selectedGems);
+    if (types.length !== 1) return;
+    const g = types[0];
+    if (game.gemPool[g] < 4) return;
+    if (g === 'gold') return;
+    if (game.playerGemCount(p) + 2 > MAX_HELD_GEMS) return;
+
+    game.gemPool[g] -= 2;
+    p.gems[g] += 2;
+  }
+
+  endAction();
+}
+
+function endAction() {
+  actionMode = null;
+  selectedGems = {};
+  selectedCardIdx = null;
+
+  showTurnTransition();
+}
+
+function showTurnTransition() {
+  game.turnHistory.push({ player: game.currentPlayerIdx });
+  game.nextPlayer();
+
+  // When we wrap back to the player who triggered the final round, game ends
+  if (game.finalRoundTriggered && game.currentPlayerIdx === game.finalRoundPlayer) {
+    endGame();
+    return;
+  }
+
+  const overlay = document.getElementById('turn-overlay');
+  overlay.classList.add('show');
+  document.getElementById('turn-msg').textContent = `请将设备传递给 ${game.currentPlayer().name}`;
+}
+
+function endGame() {
+  game.gameOver = true;
+  actionMode = null;
+  selectedGems = {};
+  selectedCardIdx = null;
+
+  // Calculate final scores
+  const results = game.players.map((p, i) => ({
+    name: p.name,
+    prestige: game.playerPrestige(p),
+    cards: p.cards.length,
+    index: i,
+  }));
+
+  // Tiebreaker: fewest cards, maintain order for display
+  results.sort((a, b) => {
+    if (b.prestige !== a.prestige) return b.prestige - a.prestige;
+    return a.cards - b.cards;
+  });
+
+  const rankList = document.getElementById('rank-list');
+  rankList.innerHTML = results.map((r, i) => {
+    const rankClass = i === 0 ? 'rank-1' : '';
+    let medal = '';
+    if (i === 0) medal = '🥇 ';
+    else if (i === 1) medal = '🥈 ';
+    else if (i === 2) medal = '🥉 ';
+    return `<li class="${rankClass}">${medal}${escHtml(r.name)} — 🏆 ${r.prestige} 声望  |  📦 ${r.cards} 张卡牌</li>`;
+  }).join('');
+
+  document.getElementById('end-overlay').classList.add('show');
+  document.getElementById('turn-overlay').classList.remove('show');
+  document.getElementById('game').classList.remove('active');
+  renderAll();
+}
+
+// ============================================================
+// BUTTON EVENT LISTENERS
+// ============================================================
+document.getElementById('btn-take3').addEventListener('click', () => {
+  if (actionMode === 'take3') { actionMode = null; selectedGems = {}; }
+  else { actionMode = 'take3'; selectedGems = {}; }
+  selectedCardIdx = null;
+  renderAll();
+});
+
+document.getElementById('btn-take2').addEventListener('click', () => {
+  if (actionMode === 'take2') { actionMode = null; selectedGems = {}; }
+  else { actionMode = 'take2'; selectedGems = {}; }
+  selectedCardIdx = null;
+  renderAll();
+});
+
+document.getElementById('btn-buy').addEventListener('click', () => {
+  if (actionMode === 'buy') { actionMode = null; selectedCardIdx = null; }
+  else { actionMode = 'buy'; selectedCardIdx = null; selectedGems = {}; }
+  renderAll();
+});
+
+document.getElementById('btn-reserve').addEventListener('click', () => {
+  if (actionMode === 'reserve') { actionMode = null; selectedCardIdx = null; }
+  else { actionMode = 'reserve'; selectedCardIdx = null; selectedGems = {}; }
+  renderAll();
+});
+
+document.getElementById('btn-cancel').addEventListener('click', () => {
+  actionMode = null;
+  selectedGems = {};
+  selectedCardIdx = null;
+  renderAll();
+});
+
+document.getElementById('btn-confirm').addEventListener('click', () => {
+  confirmTakeGems();
+  renderAll();
+});
+
+document.getElementById('btn-continue').addEventListener('click', () => {
+  document.getElementById('turn-overlay').classList.remove('show');
+  renderAll();
+});
+
+document.getElementById('btn-restart').addEventListener('click', () => {
+  document.getElementById('end-overlay').classList.remove('show');
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('setup').style.display = '';
+});
+
+// Setup screen
+document.getElementById('sel-count').addEventListener('change', (e) => {
+  const n = parseInt(e.target.value);
+  document.getElementById('pn-4').style.display = n >= 4 ? '' : 'none';
+});
+
+document.getElementById('btn-start').addEventListener('click', () => {
+  const count = parseInt(document.getElementById('sel-count').value);
+  const nameInputs = document.querySelectorAll('.pname');
+  const names = [];
+  for (let i = 0; i < count; i++) {
+    const name = nameInputs[i].value.trim() || `玩家${i+1}`;
+    names.push(name);
+  }
+
+  game = new GameState(names);
+  actionMode = null;
+  selectedGems = {};
+  selectedCardIdx = null;
+
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('game').classList.add('active');
+  renderAll();
+});
+
+// ============================================================
+// UTILITY
+// ============================================================
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+
+</body>
+</html>

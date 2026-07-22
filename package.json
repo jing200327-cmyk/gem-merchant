@@ -1,0 +1,12 @@
+{
+  "name": "gem-merchant",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test --test-isolation=none tests/*.test.js",
+    "simulate": "node scripts/simulate.mjs",
+    "simulate:10000": "node scripts/simulate.mjs --games=10000 --snapshot-limit=0"
+  }
+}

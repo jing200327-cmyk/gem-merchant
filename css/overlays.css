@@ -1,0 +1,16 @@
+.overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1rem; background: rgb(5 10 14 / .94); }
+.dialog-card { width: min(35rem, 100%); padding: 1.5rem; border: 1px solid var(--line-strong); border-top: .25rem solid var(--gold); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow); text-align: center; }
+.dialog-card h2 { margin-top: .25rem; font-size: 1.75rem; }
+.dialog-card > p { margin-top: .625rem; color: var(--text-muted); }
+.dialog-actions { display: flex; justify-content: center; gap: .625rem; margin-top: 1.25rem; flex-wrap: wrap; }
+.privacy-mark { color: var(--gold); font-size: 2.5rem; }
+.return-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1rem; }
+.return-item { padding: .625rem; border: 1px solid var(--line); background: var(--bg); }
+.return-item strong, .return-item small { display: block; }
+.return-controls { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .5rem; }
+.return-controls button { width: 2rem; height: 2rem; border: 1px solid var(--line-strong); background: var(--surface-raised); cursor: pointer; }
+.noble-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-top: 1rem; }
+.noble-choice { cursor: pointer; text-align: left; }
+.ranking { margin: 1rem 0 0; padding: 0; list-style: none; text-align: left; }
+.ranking li { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem; border-bottom: 1px solid var(--line); }
+.ranking li.is-winner { border-left: .1875rem solid var(--gold); background: rgb(216 173 85 / .08); }

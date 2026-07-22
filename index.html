@@ -1,0 +1,153 @@
+
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111a24">
+  <title>宝石商人</title>
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/board.css">
+  <link rel="stylesheet" href="./css/cards.css">
+  <link rel="stylesheet" href="./css/overlays.css">
+  <link rel="stylesheet" href="./css/responsive.css">
+  <link rel="stylesheet" href="./css/desk.css">
+  <link rel="stylesheet" href="./css/player-sidebar.css">
+</head>
+<body>
+  <main id="app">
+    <section id="setup" class="setup-screen" aria-labelledby="setup-title">
+      <div class="setup-mark" aria-hidden="true">◆</div>
+      <p class="eyebrow">THE GEM MERCHANT</p>
+      <h1 id="setup-title">宝石商人</h1>
+      <p class="setup-copy">收集稀世宝石，投资商路，赢得贵族青睐。</p>
+      <form id="setup-form" class="setup-form">
+        <label class="field-row" for="player-count">
+          <span>商人人数</span>
+          <select id="player-count" name="playerCount">
+            <option value="2">2 人</option>
+            <option value="3" selected>3 人</option>
+            <option value="4">4 人</option>
+          </select>
+        </label>
+        <div id="player-name-fields" class="player-name-fields"></div>
+        <button class="button button-primary button-wide" type="submit">开启商路</button>
+      </form>
+      <p class="setup-footnote">真人与 AI 混合对局 · 2–4 人 · 无需联网</p>
+    </section>
+
+    <section id="game" class="game-shell" aria-labelledby="game-title" hidden>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">THE GEM MERCHANT</p>
+          <h1 id="game-title">宝石商人</h1>
+        </div>
+        <div class="topbar-actions">
+          <span id="version-badge" class="version-badge"></span>
+          <button class="button button-quiet" type="button" data-command="export">导出存档</button>
+          <label class="button button-quiet file-button">
+            导入存档
+            <input id="import-file" type="file" accept="application/json,.json">
+          </label>
+          <button class="button button-quiet" type="button" data-command="new-game">新对局</button>
+        </div>
+      </header>
+
+      <section id="opponents" class="opponents" aria-label="其他玩家"></section>
+
+      <div class="game-grid">
+        <section class="board-column">
+          <div id="turn-banner" class="turn-banner" aria-live="polite"></div>
+
+          <section class="board-section noble-section" aria-labelledby="nobles-title">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">PATRONS</p>
+                <h2 id="nobles-title">贵族议会</h2>
+              </div>
+              <p>回合结束时自动检查</p>
+            </div>
+            <div id="nobles" class="nobles-row"></div>
+          </section>
+
+          <section class="board-section market-section" aria-labelledby="market-title">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">DEVELOPMENTS</p>
+                <h2 id="market-title">发展卡市场</h2>
+              </div>
+              <p id="market-hint">选择一项主要行动</p>
+            </div>
+            <div id="market"></div>
+          </section>
+
+          <section class="board-section" aria-labelledby="tokens-title">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">TREASURY</p>
+                <h2 id="tokens-title">公共宝石池</h2>
+              </div>
+              <p>黄金仅通过预留卡牌获得</p>
+            </div>
+            <div id="token-pool" class="token-pool"></div>
+          </section>
+        </section>
+
+        <aside class="player-column">
+          <section id="player-panel" class="player-panel" aria-labelledby="player-panel-title"></section>
+
+          <section class="action-panel" aria-labelledby="actions-title">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">YOUR MOVE</p>
+                <h2 id="actions-title">主要行动</h2>
+              </div>
+            </div>
+            <div id="action-buttons" class="action-buttons">
+              <button class="action-button" type="button" data-intent="take-different">
+                <span aria-hidden="true">◇◆●</span><strong>拿取三色</strong><small>三种不同颜色</small>
+              </button>
+              <button class="action-button" type="button" data-intent="take-same">
+                <span aria-hidden="true">◆◆</span><strong>拿取同色</strong><small>该色库存至少四枚</small>
+              </button>
+              <button class="action-button" type="button" data-intent="buy">
+                <span aria-hidden="true">▣</span><strong>购买卡牌</strong><small>市场或预留区</small>
+              </button>
+              <button class="action-button" type="button" data-intent="reserve">
+                <span aria-hidden="true">▤</span><strong>预留卡牌</strong><small>至多三张并获取黄金</small>
+              </button>
+            </div>
+            <div id="selection-controls" class="selection-controls" hidden>
+              <p id="selection-summary"></p>
+              <div>
+                <button class="button button-quiet" type="button" data-command="cancel-intent">取消</button>
+                <button id="confirm-selection" class="button button-primary" type="button" data-command="confirm-selection">确认</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="log-panel" aria-labelledby="log-title">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">LEDGER</p>
+                <h2 id="log-title">行动账簿</h2>
+              </div>
+              <span id="snapshot-count" class="snapshot-count"></span>
+            </div>
+            <ol id="action-log" class="action-log"></ol>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="phase-overlay" class="overlay" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
+
+
+

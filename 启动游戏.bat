@@ -1,23 +1,34 @@
 @echo off
 setlocal
-title 宝石商人 - 本地游戏服务器
+title Gem Merchant
 
+set "ONLINE_GAME_URL=https://jing200327-cmyk.github.io/-/"
+
+echo Checking online version...
+powershell -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -Method Head -TimeoutSec 5 -Uri '%ONLINE_GAME_URL%' ^| Out-Null; exit 0 } catch { exit 1 }"
+if not errorlevel 1 (
+  echo Opening online version: %ONLINE_GAME_URL%
+  start "Gem Merchant Online" "%ONLINE_GAME_URL%"
+  exit /b 0
+)
+
+echo Online version is unavailable. Starting local game instead.
 where node >nul 2>nul
 if errorlevel 1 (
   echo.
-  echo 未检测到 Node.js。
-  echo 请安装 Node.js 20 或更高版本后，再双击本文件。
-  echo 下载地址：https://nodejs.org/
+  echo Node.js was not found and the online version is unavailable.
+  echo Install Node.js 20 or later, then run this launcher again:
+  echo https://nodejs.org/
   echo.
   pause
   exit /b 1
 )
 
-echo 正在启动宝石商人……
-echo 浏览器将打开 http://127.0.0.1:4173
-start "宝石商人" cmd /c "timeout /t 1 /nobreak ^>nul ^& start http://127.0.0.1:4173"
+echo Starting local Gem Merchant...
+echo Your browser will open http://127.0.0.1:4173
+start "Gem Merchant Local" cmd /c "timeout /t 1 /nobreak ^>nul ^& start http://127.0.0.1:4173"
 node server.mjs
 
 echo.
-echo 游戏服务器已停止。
+echo Game server stopped.
 pause

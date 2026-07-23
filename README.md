@@ -41,6 +41,21 @@ npm run simulate:10000
 | 黑色 | Onyx | 稳重、深色的缟玛瑙 |
 | 黄金 | Gold | 预留卡获得的金币资源 |
 
+### 图标展示
+
+<table>
+  <tr>
+    <td align="center"><strong>白色 · Diamond</strong><br><img src="./src/icon/白色的钻石.png" alt="白色钻石" width="120"></td>
+    <td align="center"><strong>蓝色 · Sapphire</strong><br><img src="./src/icon/蓝色的长椭圆形宝石.png" alt="蓝色长椭圆形宝石" width="120"></td>
+    <td align="center"><strong>绿色 · Emerald</strong><br><img src="./src/icon/切角长方阶梯切割绿色琥珀.png" alt="绿色切角宝石" width="120"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>红色 · Ruby</strong><br><img src="./src/icon/六边形切角红色正方块宝石.png" alt="红色切角宝石" width="120"></td>
+    <td align="center"><strong>黑色 · Onyx</strong><br><img src="./src/icon/棕黑色八角切割长条宝石.png" alt="棕黑色八角宝石" width="120"></td>
+    <td align="center"><strong>黄金 · Gold</strong><br><img src="./src/icon/印有美元符号的黄金金币.png" alt="黄金金币" width="120"></td>
+  </tr>
+</table>
+
 ![宝石与市场视觉](./src/pc/817d4645f61ac45f1fe9f70c5c42ee22.png)
 
 发展卡以对应属性色为主题底色，中心放置宝石图标与高光；费用以深色圆形筹码呈现，数字在圆心，宝石图标附着在圆边。这样能让资源类型、永久折扣与支付需求在一次扫视中完成识别。

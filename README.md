@@ -14,7 +14,7 @@
 
 ## 快速开始
 
-访问：https://jing200327-cmyk.github.io/-/
+访问：https://jing200327-cmyk.github.io/gem-merchant/
 
 要求：Node.js 20+（仅用于启动本地静态服务器与测试）。
 
